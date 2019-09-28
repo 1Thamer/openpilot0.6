@@ -14,14 +14,11 @@ class CarInterface(object):
   def __init__(self, CP, CarController):
     self.CP = CP
     self.VM = VehicleModel(CP)
-    self.idx = 0
-    self.lanes = 0
-    self.lkas_request = 0
+    self.frame = 0
 
     self.gas_pressed_prev = False
     self.brake_pressed_prev = False
     self.cruise_enabled_prev = False
-    self.low_speed_alert = False
 
     # *** init the major players ***
     self.CS = CarState(CP)
@@ -228,12 +225,12 @@ class CarInterface(object):
     ret.steeringPressed = self.CS.steer_override
 
     # cruise state
-    ret.cruiseState.enabled = self.CS.pcm_acc_status != 0
+    ret.cruiseState.enabled = self.CS.lkas_button_on
     if self.CS.pcm_acc_status != 0:
       ret.cruiseState.speed = self.CS.cruise_set_speed
     else:
       ret.cruiseState.speed = 0
-    ret.cruiseState.available = bool(self.CS.main_on)
+    ret.cruiseState.available = True
     ret.cruiseState.standstill = False
 
     # TODO: button presses
@@ -264,6 +261,9 @@ class CarInterface(object):
     if ret.vEgo > (self.CP.minSteerSpeed + 1.):
       self.low_speed_alert = False
 
+    # turning indicator alert hysteresis logic
+    self.turning_indicator_alert = True if self.CS.left_blinker_on or self.CS.right_blinker_on else False
+
     events = []
     if not ret.gearShifter == GearShifter.drive:
       events.append(create_event('wrongGear', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
@@ -273,8 +273,8 @@ class CarInterface(object):
       events.append(create_event('seatbeltNotLatched', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
     if self.CS.esp_disabled:
       events.append(create_event('espDisabled', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
-    if not self.CS.main_on:
-      events.append(create_event('wrongCarMode', [ET.NO_ENTRY, ET.USER_DISABLE]))
+    #if not self.CS.main_on:
+      #events.append(create_event('wrongCarMode', [ET.NO_ENTRY, ET.USER_DISABLE]))
     if ret.gearShifter == GearShifter.reverse:
       events.append(create_event('reverseGear', [ET.NO_ENTRY, ET.IMMEDIATE_DISABLE]))
     if self.CS.steer_error:
@@ -286,15 +286,18 @@ class CarInterface(object):
       events.append(create_event('pcmDisable', [ET.USER_DISABLE]))
 
     # disable on pedals rising edge or when brake is pressed and speed isn't zero
-    if (ret.gasPressed and not self.gas_pressed_prev) or \
-      (ret.brakePressed and (not self.brake_pressed_prev or ret.vEgoRaw > 0.1)):
-      events.append(create_event('pedalPressed', [ET.NO_ENTRY, ET.USER_DISABLE]))
+    #if (ret.gasPressed and not self.gas_pressed_prev) or \
+      #(ret.brakePressed and (not self.brake_pressed_prev or ret.vEgoRaw > 0.1)):
+      #events.append(create_event('pedalPressed', [ET.NO_ENTRY, ET.USER_DISABLE]))
 
-    if ret.gasPressed:
-      events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
+    #if ret.gasPressed:
+      #events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
 
     if self.low_speed_alert:
       events.append(create_event('belowSteerSpeed', [ET.WARNING]))
+
+    if self.turning_indicator_alert:
+      events.append(create_event('turningIndicatorOn', [ET.WARNING]))
 
     ret.events = events
 
@@ -311,7 +314,9 @@ class CarInterface(object):
     # Fix for Genesis hard fault when steer request sent while the speed is low 
     enable = 0 if self.CS.v_ego < self.CP.minSteerSpeed and self.CP.carFingerprint == CAR.GENESIS else c.enabled
     
-    can_sends = self.CC.update(enable, self.CS, c.actuators,
-                               c.cruiseControl.cancel, hud_alert)
+    can_sends = self.CC.update(enable, self.CS, self.frame, c.actuators,
+                               c.cruiseControl.cancel, hud_alert, c.hudControl.leftLaneVisible,
+                               c.hudControl.rightLaneVisible, c.hudControl.leftLaneDepart, c.hudControl.rightLaneDepart)
 
+    self.frame += 1
     return can_sends
