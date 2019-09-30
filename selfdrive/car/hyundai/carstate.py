@@ -163,11 +163,10 @@ class CarState(object):
     self.esp_disabled = cp.vl["TCS15"]['ESC_Off_Step']
     self.park_brake = cp.vl["CGW1"]['CF_Gway_ParkBrakeSw']
 
-    self.has_scc = True if (cp.vl["SCC11"]['TauGapSet'] > 0) else False
+    self.has_scc = False
     self.main_on = True #(cp.vl["SCC11"]["MainMode_ACC"] != 0) if self.has_scc else \
                                             #cp.vl['EMS16']['CRUISE_LAMP_M']
-    self.acc_active = (cp.vl["SCC12"]['ACCMode'] != 0) if self.has_scc else \
-                                      (cp.vl["LVR12"]['CF_Lvr_CruiseSet'] != 0)
+    self.acc_active = True
     self.pcm_acc_status = int(self.acc_active)
 
     # calc best v_ego estimate, by averaging two opposite corners
