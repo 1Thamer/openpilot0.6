@@ -164,8 +164,8 @@ class CarState(object):
     self.park_brake = cp.vl["CGW1"]['CF_Gway_ParkBrakeSw']
 
     self.has_scc = True if (cp.vl["SCC11"]['TauGapSet'] > 0) else False
-    self.main_on = (cp.vl["SCC11"]["MainMode_ACC"] != 0) if self.has_scc else \
-                                            cp.vl['EMS16']['CRUISE_LAMP_M']
+    self.main_on = True #(cp.vl["SCC11"]["MainMode_ACC"] != 0) if self.has_scc else \
+                                            #cp.vl['EMS16']['CRUISE_LAMP_M']
     self.acc_active = (cp.vl["SCC12"]['ACCMode'] != 0) if self.has_scc else \
                                       (cp.vl["LVR12"]['CF_Lvr_CruiseSet'] != 0)
     self.pcm_acc_status = int(self.acc_active)
@@ -236,7 +236,7 @@ class CarState(object):
       self.gear_shifter = "unknown"
 
     # Gear Selection via Cluster - For those Kia/Hyundai which are not fully discovered, we can use the Cluster Indicator for Gear Selection, as this seems to be standard over all cars, but is not the preferred method.
-    if cp.vl["CLU15"]["CF_Clu_InhibitD"] == 1:
+    if 1: #cp.vl["CLU15"]["CF_Clu_InhibitD"] == 1:
       self.gear_shifter_cluster = "drive"
     elif cp.vl["CLU15"]["CF_Clu_InhibitN"] == 1:
       self.gear_shifter_cluster = "neutral"
