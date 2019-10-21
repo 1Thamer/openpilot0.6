@@ -83,3 +83,34 @@ def create_clu11(packer, clu11, button, cnt):
   }
 
   return packer.make_can_msg("CLU11", 0, values)
+
+def create_scc12(packer, cnt, scc12):
+  values = {
+    "CF_VSM_Prefill": SCC12["CF_VSM_Prefill"],
+    "CF_VSM_DecCmdAct": SCC12["CF_VSM_DecCmdAct"],
+    "CF_VSM_HBACmd": SCC12["CF_VSM_HBACmd"],
+    "CF_VSM_Warn": SCC12["CF_VSM_Warn"],
+    "CF_VSM_Stat": SCC12["CF_VSM_Stat"],
+    "CF_VSM_BeltCmd": SCC12["CF_VSM_BeltCmd"],
+    "ACCFailInfo": SCC12["ACCFailInfo"],
+    "ACCMode": SCC12["ACCMode"],
+    "StopReq": SCC12["StopReq"],
+    "CR_VSM_DecCmd": SCC12["CR_VSM_DecCmd"],
+    "aReqMax": SCC12["aReqMax"],
+    "TakeOverReq": SCC12["TakeOverReq"],
+    "PreFill": SCC12["PreFill"],
+    "aReqMin": SCC12["aReqMin"],
+    "CF_VSM_ConfMode": SCC12["CF_VSM_ConfMode"],
+    "AEB_Failinfo": SCC12["AEB_Failinfo"],
+    "AEB_Status": SCC12["AEB_Status"],
+    "AEB_CmdAct": SCC12["AEB_CmdAct"],
+    "AEB_StopReq": SCC12["AEB_StopReq"],
+    "CR_VSM_Alive": SCC12["CR_VSM_Alive"],
+    "CR_VSM_ChkSum": SCC12["CR_VSM_ChkSum"],
+  }
+
+  #dat = packer.make_can_msg("SCC12", 0, values)[2]
+ # checksum = sum(dat) % 256
+  #values["CF_Mdps_Chksum2"] = checksum
+
+  return packer.make_can_msg("SCC12", 0, values)
