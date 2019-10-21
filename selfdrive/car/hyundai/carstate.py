@@ -54,6 +54,8 @@ def get_can_parser(CP):
 
     ("CF_Lvr_GearInf", "LVR11", 0),        #Transmission Gear (0 = N or P, 1-8 = Fwd, 14 = Rev)
 
+    ("SAS_Angle", "SAS11", 0),
+    ("SAS_Speed", "SAS11", 0),
   ]
 
   checks = [
@@ -65,6 +67,7 @@ def get_can_parser(CP):
     ("CGW1", 10),
     ("CGW4", 5),
     ("WHL_SPD11", 50),
+    ("SAS11", 100)
   ]
   if CP.carFingerprint not in FEATURES["non_scc"]:
     signals += [
@@ -122,16 +125,12 @@ def get_mdps_parser(CP):
     ("CR_Mdps_StrTq", "MDPS12", 0),
     ("CF_Mdps_FailStat", "MDPS12", 0),
     ("CR_Mdps_OutTq", "MDPS12", 0),
-
-    ("SAS_Angle", "SAS11", 0),
-    ("SAS_Speed", "SAS11", 0),
   ]
 
   checks = [
     # address, frequency
     ("MDPS12", 50),
     ("MDPS11", 100),
-    ("SAS11", 100)
   ]
 
   return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, 1)
@@ -226,8 +225,8 @@ class CarState():
                                          (cp.vl["LVR12"]["CF_Lvr_CruiseSet"] * speed_conv)
     self.standstill = not v_wheel > 0.1
 
-    self.angle_steers = cp_mdps.vl["SAS11"]['SAS_Angle']
-    self.angle_steers_rate = cp_mdps.vl["SAS11"]['SAS_Speed']
+    self.angle_steers = cp.vl["SAS11"]['SAS_Angle']
+    self.angle_steers_rate = cp.vl["SAS11"]['SAS_Speed']
     self.yaw_rate = cp.vl["ESP12"]['YAW_RATE']
     self.left_blinker_on = cp.vl["CGW1"]['CF_Gway_TSigLHSw']
     self.left_blinker_flash = cp.vl["CGW1"]['CF_Gway_TurnSigLh']
