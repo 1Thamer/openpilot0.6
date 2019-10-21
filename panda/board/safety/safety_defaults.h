@@ -126,9 +126,20 @@ static int nooutput_tx_lin_hook(int lin_num, uint8_t *data, int len) {
         HKG_MDPS12_cnt += 1;
         HKG_MDPS12_cnt %= 345;
       }
-      bus_fwd = 2;
+      bus_fwd = 12;
+    }
+    if (bus_num == 1) {
+      bus_fwd = 20;
     }
     if (bus_num == 2) {
+      bus_fwd = 10;
+    }
+  }
+  else {
+    if (bus_num == 0) {
+      bus_fwd = 1;
+    }
+    if (bus_num == 1) {
       bus_fwd = 0;
     }
   }
