@@ -91,7 +91,7 @@ class CarController():
     can_sends = []
 
     self.lkas11_cnt = frame % 0x10
-    self.scc12_cnt = frame % 0x10
+    self.scc12_cnt %= 0x10
 
     if self.camera_disconnected:
       if (frame % 10) == 0:
