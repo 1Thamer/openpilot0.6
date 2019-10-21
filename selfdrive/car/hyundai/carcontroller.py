@@ -2,7 +2,7 @@ from cereal import car
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_lkas12, \
                                              create_1191, create_1156, \
-                                             create_clu11
+                                             create_clu11, create_scc12
 from selfdrive.car.hyundai.values import CAR, Buttons
 from selfdrive.can.packer import CANPacker
 
@@ -54,6 +54,7 @@ class CarController():
     self.car_fingerprint = car_fingerprint
     self.lkas11_cnt = 0
     self.clu11_cnt = 0
+    self.scc12_cnt = 0
     self.last_resume_frame = 0
     self.last_lead_distance = 0
     # True when giraffe switch 2 is low and we need to replace all the camera messages
@@ -90,6 +91,7 @@ class CarController():
     can_sends = []
 
     self.lkas11_cnt = frame % 0x10
+    self.scc12_cnt = frame % 0x10
 
     if self.camera_disconnected:
       if (frame % 10) == 0:
@@ -102,6 +104,10 @@ class CarController():
     can_sends.append(create_lkas11(self.packer, self.car_fingerprint, apply_steer, steer_req, self.lkas11_cnt,
                                    enabled, CS.lkas11, hud_alert, lane_visible, left_lane_depart, right_lane_depart,
                                    keep_stock=(not self.camera_disconnected)))
+    
+    if frame % 2:
+      can_sends.append(create_scc12(self.packer, self.scc12_cnt, CS.scc12))
+      self.scc12_cnt += 1
 
     #if pcm_cancel_cmd:
       #self.clu11_cnt = frame % 0x10
