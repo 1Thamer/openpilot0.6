@@ -105,7 +105,7 @@ def create_scc12(packer, cnt, scc12):
     "AEB_Status": SCC12["AEB_Status"],
     "AEB_CmdAct": SCC12["AEB_CmdAct"],
     "AEB_StopReq": SCC12["AEB_StopReq"],
-    "CR_VSM_Alive": SCC12["CR_VSM_Alive"],
+    "CR_VSM_Alive": cnt,
     "CR_VSM_ChkSum": SCC12["CR_VSM_ChkSum"],
   }
 
