@@ -109,8 +109,8 @@ def create_scc12(packer, cnt, scc12):
     "CR_VSM_ChkSum": scc12["CR_VSM_ChkSum"],
   }
 
-  #dat = packer.make_can_msg("SCC12", 0, values)[2]
- # checksum = sum(dat) % 256
-  #values["CF_Mdps_Chksum2"] = checksum
+  dat = packer.make_can_msg("SCC12", 0, values)[2]
+  checksum = 16 - sum([sum(divmod(i, 16) for i in dat]) % 16
+  values["CF_Mdps_Chksum2"] = checksum
 
   return packer.make_can_msg("SCC12", 0, values)
