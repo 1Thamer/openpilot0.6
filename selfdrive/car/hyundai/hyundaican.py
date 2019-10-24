@@ -106,7 +106,7 @@ def create_scc12(packer, cnt, scc12):
     "AEB_CmdAct": scc12["AEB_CmdAct"],
     "AEB_StopReq": scc12["AEB_StopReq"],
     "CR_VSM_Alive": cnt,
-    "CR_VSM_ChkSum": scc12["CR_VSM_ChkSum"],
+    "CR_VSM_ChkSum": 0,
   }
 
   dat = packer.make_can_msg("SCC12", 0, values)[2]
