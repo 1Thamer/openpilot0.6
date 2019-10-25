@@ -113,3 +113,23 @@ def create_scc12(packer, cnt, scc12):
   values["CR_VSM_ChkSum"] = 16 - sum([sum(divmod(i, 16)) for i in dat]) % 16
 
   return packer.make_can_msg("SCC12", 0, values)
+
+def create_scc11(packer, cnt, scc11):
+  values = {
+    "MainMode_ACC": scc11["MainMode_ACC"],
+    "SCCInfoDisplay": scc11["SCCInfoDisplay"],
+    "AliveCounterACC": cnt,
+    "VSetDis": scc11["VSetDis"],
+    "ObjValid": scc11["ObjValid"],
+    "DriverAlertDisplay": scc11["DriverAlertDisplay"],
+    "TauGapSet": scc11["TauGapSet"],
+    "ACC_ObjStatus": scc11["ACC_ObjStatus"],
+    "ACC_ObjLatPos": scc11["ACC_ObjLatPos"],
+    "ACC_ObjDist": scc11["ACC_ObjDist"],
+    "ACC_ObjRelSpd": scc11["ACC_ObjRelSpd"],
+    "Navi_SCC_Curve_Status": scc11["Navi_SCC_Curve_Status"],
+    "Navi_SCC_Curve_Act": scc11["Navi_SCC_Curve_Act"],
+    "Navi_SCC_Camera_Act": scc11["Navi_SCC_Camera_Act"],
+    "Navi_SCC_Camera_Status": scc11["Navi_SCC_Camera_Status"],
+   }
+  return packer.make_can_msg("scc11", 0, values)
