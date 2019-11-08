@@ -132,7 +132,7 @@ static int hyundai_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     }
 
     if (violation) {
-      tx = 0;
+      tx = 1;
     }
   }
 
