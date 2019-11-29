@@ -86,6 +86,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     internetConnectivityNeeded @61;
     manualSteeringRequired @62;
     manualSteeringRequiredBlinkersOn @63;
+    turningIndicatorOn @64;
   }
 }
 
