@@ -78,9 +78,9 @@ static int hyundai_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   int addr = GET_ADDR(to_send);
 
   // There can be only one! (camera)
-  if (hyundai_camera_detected) {
-    tx = 0;
-  }
+  //if (hyundai_camera_detected) {
+  //  tx = 0;
+ // }
 
   // LKA STEER: safety check
   if (addr == 832) {
@@ -159,11 +159,13 @@ static int hyundai_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
     if (bus_num == 0) {
       if ((addr != 593) || (!OP_LKAS_live)) {
         bus_fwd = hyundai_camera_bus;
-      }
+	  }
     }
     if (bus_num == hyundai_camera_bus) {
       if (addr != 832) {
-        bus_fwd = 0;
+        if ((!OP_LKAS_live) || (addr != 1057)) {
+          bus_fwd = 0;
+        }
       }
       else if (!OP_LKAS_live) {
         hyundai_LKAS_forwarded = 1;
