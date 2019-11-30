@@ -15,7 +15,7 @@ int hyundai_cruise_engaged_last = 0;
 uint32_t hyundai_ts_last = 0;
 struct sample_t hyundai_torque_driver;         // last few driver torques measured
 int OP_LKAS_live = 0;
-bool hyundai_LKAS_forwarded = 0;
+int hyundai_LKAS_forwarded = 0;
 bool hyundai_has_scc = 0;
 
 static void hyundai_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
@@ -78,9 +78,9 @@ static int hyundai_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   int addr = GET_ADDR(to_send);
 
   // There can be only one! (camera)
-  if (hyundai_camera_detected) {
-    tx = 0;
-  }
+  //if (hyundai_camera_detected) {
+  //  tx = 0;
+ // }
 
   // LKA STEER: safety check
   if (addr == 832) {
@@ -88,11 +88,11 @@ static int hyundai_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     uint32_t ts = TIM2->CNT;
     bool violation = 0;
 
-    if (!hyundai_LKAS_forwarded) {
+    if (hyundai_LKAS_forwarded < 1) {
       OP_LKAS_live = 20;
     }
-    if ((hyundai_LKAS_forwarded) && (!OP_LKAS_live)) {
-      hyundai_LKAS_forwarded = 0;
+    if ((hyundai_LKAS_forwarded > 0) && (!OP_LKAS_live)) {
+      hyundai_LKAS_forwarded -= 1;
       return 1;
     }
     if (controls_allowed) {
@@ -157,21 +157,40 @@ static int hyundai_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
   // forward cam to ccan and viceversa, except lkas cmd
   if (!hyundai_camera_detected) {
     if (bus_num == 0) {
+      bus_fwd = hyundai_camera_bus + 10;
+    }
+    if (bus_num == 1) {
       if ((addr != 593) || (!OP_LKAS_live)) {
-        bus_fwd = hyundai_camera_bus;
-      }
+        bus_fwd = hyundai_camera_bus * 10;
+      } else {
+        bus_fwd = 0;
+	  }
     }
     if (bus_num == hyundai_camera_bus) {
       if (addr != 832) {
-        bus_fwd = 0;
+        if ((!OP_LKAS_live) || (addr != 1057)) {
+          bus_fwd = 10;
+        } else {
+          bus_fwd = 1;
+        }
       }
       else if (!OP_LKAS_live) {
-        hyundai_LKAS_forwarded = 1;
-        bus_fwd = 0;
+        hyundai_LKAS_forwarded = 2;
+        bus_fwd = 10;
       }
       else {
         OP_LKAS_live -= 1;
+        hyundai_LKAS_forwarded = 1;
+        bus_fwd = 0;
       }
+    }
+  }
+  else {
+    if (bus_num == 0) {
+      bus_fwd = 1;
+    }
+    if (bus_num == 1) {
+      bus_fwd = 0;
     }
   }
   return bus_fwd;
