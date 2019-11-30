@@ -88,7 +88,6 @@ def create_clu11(packer, clu11, button, cnt):
 
   return packer.make_can_msg("CLU11", 0, values)
 
-<<<<<<< HEAD
 def create_scc12(packer, cnt, scc12):
   values = {
     "CF_VSM_Prefill": scc12["CF_VSM_Prefill"],
@@ -159,4 +158,3 @@ def create_mdps12(packer, car_fingerprint, cnt, mdps12):
   values["CF_Mdps_Chksum2"] = checksum
 
   return packer.make_can_msg("MDPS12", 2, values)
-
