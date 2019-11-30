@@ -6,7 +6,7 @@ hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 def make_can_msg(addr, dat, alt):
   return [addr, 0, dat, alt]
 
-def create_lkas11(packer, car_fingerprint, apply_steer, steer_req, cnt, enabled, lkas11, hud_alert,
+def create_lkas11(packer, car_fingerprint, bus, apply_steer, steer_req, cnt, enabled, lkas11, hud_alert,
                                    lane_visible, left_lane_depart, right_lane_depart, keep_stock=False):
   values = {
     "CF_Lkas_Bca_R": 3 if enabled else 0,
@@ -38,7 +38,7 @@ def create_lkas11(packer, car_fingerprint, apply_steer, steer_req, cnt, enabled,
     values["CF_Lkas_FcwOpt_USM"] = lkas11["CF_Lkas_FcwOpt_USM"] if keep_stock else 2
     values["CF_Lkas_LdwsOpt_USM"] = lkas11["CF_Lkas_LdwsOpt_USM"] if keep_stock else 0
 
-  dat = packer.make_can_msg("LKAS11", 0, values)[2]
+  dat = packer.make_can_msg("LKAS11", bus, values)[2]
 
   if car_fingerprint in CHECKSUM["crc8"]:
     # CRC Checksum as seen on 2019 Hyundai Santa Fe
