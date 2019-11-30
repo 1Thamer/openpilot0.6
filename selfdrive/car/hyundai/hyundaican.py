@@ -37,7 +37,11 @@ def create_lkas11(packer, car_fingerprint, apply_steer, steer_req, cnt, enabled,
     values["CF_Lkas_HbaOpt"] = lkas11["CF_Lkas_HbaOpt"] if keep_stock else 1
     values["CF_Lkas_FcwOpt_USM"] = lkas11["CF_Lkas_FcwOpt_USM"] if keep_stock else 2
     values["CF_Lkas_LdwsOpt_USM"] = lkas11["CF_Lkas_LdwsOpt_USM"] if keep_stock else 0
-
+  if car_fingerprint == CAR.KIA_OPTIMA:
+    values["CF_Lkas_Bca_R"] = 0
+    values["CF_Lkas_HbaOpt"] = lkas11["CF_Lkas_HbaOpt"] if keep_stock else 1
+    values["CF_Lkas_FcwOpt_USM"] = lkas11["CF_Lkas_FcwOpt_USM"] if keep_stock else 0
+    
   dat = packer.make_can_msg("LKAS11", 0, values)[2]
 
   if car_fingerprint in CHECKSUM["crc8"]:
@@ -84,6 +88,7 @@ def create_clu11(packer, clu11, button, cnt):
 
   return packer.make_can_msg("CLU11", 0, values)
 
+<<<<<<< HEAD
 def create_scc12(packer, cnt, scc12):
   values = {
     "CF_VSM_Prefill": scc12["CF_VSM_Prefill"],
@@ -133,3 +138,25 @@ def create_scc11(packer, cnt, scc11):
     "Navi_SCC_Camera_Status": scc11["Navi_SCC_Camera_Status"],
    }
   return packer.make_can_msg("scc11", 0, values)
+
+def create_mdps12(packer, car_fingerprint, cnt, mdps12):
+  values = {
+    "CR_Mdps_StrColTq": mdps12["CR_Mdps_StrColTq"],
+    "CF_Mdps_Def": mdps12["CF_Mdps_Def"],
+    "CF_Mdps_ToiActive": 0,
+    "CF_Mdps_ToiUnavail": 1,
+    "CF_Mdps_MsgCount2": cnt,
+    "CF_Mdps_Chksum2": 0,
+    "CF_Mdps_ToiFlt": mdps12["CF_Mdps_ToiFlt"],
+    "CF_Mdps_SErr": mdps12["CF_Mdps_SErr"],
+    "CR_Mdps_StrTq": mdps12["CR_Mdps_StrTq"],
+    "CF_Mdps_FailStat": mdps12["CF_Mdps_FailStat"],
+    "CR_Mdps_OutTq": mdps12["CR_Mdps_OutTq"],
+  }
+
+  dat = packer.make_can_msg("MDPS12", 2, values)[2]
+  checksum = sum(dat) % 256
+  values["CF_Mdps_Chksum2"] = checksum
+
+  return packer.make_can_msg("MDPS12", 2, values)
+
