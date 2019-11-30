@@ -92,7 +92,7 @@ ALERTS = [
       "TAKE CONTROL",
       "Turn Exceeds Steering Limit",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 2., 3.),
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, 1., 2., 3.),
 
   Alert(
       "steerTempUnavailable",
@@ -107,6 +107,20 @@ ALERTS = [
       "Steering Temporarily Unavailable",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .2, .2, .2),
+
+  Alert(
+      "manualSteeringRequired",
+      "STEERING REQUIRED: Lane Keeping OFF",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
+
+  Alert(
+      "manualSteeringRequiredBlinkersOn",
+      "STEERING REQUIRED: Blinkers ON",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
 
   Alert(
       "preDriverDistracted",
@@ -410,63 +424,63 @@ ALERTS = [
       "TAKE CONTROL IMMEDIATELY",
       "Controls Failed",
       AlertStatus.critical, AlertSize.full,
-      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 1., 3., 4.),
+      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "controlsMismatch",
       "TAKE CONTROL IMMEDIATELY",
       "Controls Mismatch",
       AlertStatus.critical, AlertSize.full,
-      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 1., 3., 4.),
+      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "canError",
       "TAKE CONTROL IMMEDIATELY",
       "CAN Error: Check Connections",
       AlertStatus.critical, AlertSize.full,
-      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 1., 3., 4.),
+      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "steerUnavailable",
       "TAKE CONTROL IMMEDIATELY",
       "LKAS Fault: Restart the Car",
       AlertStatus.critical, AlertSize.full,
-      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 1., 3., 4.),
+      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "brakeUnavailable",
       "TAKE CONTROL IMMEDIATELY",
       "Cruise Fault: Restart the Car",
       AlertStatus.critical, AlertSize.full,
-      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 1., 3., 4.),
+      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "gasUnavailable",
       "TAKE CONTROL IMMEDIATELY",
       "Gas Fault: Restart the Car",
       AlertStatus.critical, AlertSize.full,
-      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 1., 3., 4.),
+      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "reverseGear",
       "TAKE CONTROL IMMEDIATELY",
       "Reverse Gear",
       AlertStatus.critical, AlertSize.full,
-      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 1., 3., 4.),
+      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "cruiseDisabled",
       "TAKE CONTROL IMMEDIATELY",
       "Cruise Is Off",
       AlertStatus.critical, AlertSize.full,
-      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 1., 3., 4.),
+      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "plannerError",
       "TAKE CONTROL IMMEDIATELY",
       "Planner Solution Error",
       AlertStatus.critical, AlertSize.full,
-      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 1., 3., 4.),
+      Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   # not loud cancellations (user is in control)
   Alert(
@@ -635,6 +649,13 @@ ALERTS = [
       "invalidGiraffeHondaNoEntry",
       "openpilot Unavailable",
       "Set 0111 for openpilot. 1011 for stock",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeDisengage, .4, 2., 3.),
+
+  Alert(
+      "invalidGiraffeToyotaNoEntry",
+      "openpilot Unavailable",
+      "Visit comma.ai/tg",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeDisengage, .4, 2., 3.),
 

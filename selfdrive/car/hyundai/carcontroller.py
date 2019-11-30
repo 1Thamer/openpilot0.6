@@ -2,20 +2,10 @@ from cereal import car
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_lkas12, \
                                              create_1191, create_1156, \
-                                             create_clu11, create_scc12
-from selfdrive.car.hyundai.values import CAR, Buttons
+                                             create_clu11, create_scc12, create_mdps12
+from selfdrive.car.hyundai.values import CAR, Buttons, SteerLimitParams
 from selfdrive.can.packer import CANPacker
 
-
-# Steer torque limits
-
-class SteerLimitParams:
-  STEER_MAX = 255   # 409 is the max, 255 is stock
-  STEER_DELTA_UP = 3
-  STEER_DELTA_DOWN = 7
-  STEER_DRIVER_ALLOWANCE = 50
-  STEER_DRIVER_MULTIPLIER = 2
-  STEER_DRIVER_FACTOR = 1
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -92,6 +82,8 @@ class CarController():
 
     self.lkas11_cnt = frame % 0x10
     self.scc12_cnt %= 15
+    self.mdps12_cnt = frame % 0x100
+
 
     if self.camera_disconnected:
       if (frame % 10) == 0:
@@ -100,6 +92,8 @@ class CarController():
         can_sends.append(create_1191())
       if (frame % 7) == 0:
         can_sends.append(create_1156())
+    elif not pcm_cancel_cmd:
+      can_sends.append(create_mdps12(self.packer, self.car_fingerprint, self.mdps12_cnt, CS.mdps12))
 
     can_sends.append(create_lkas11(self.packer, self.car_fingerprint, apply_steer, steer_req, self.lkas11_cnt,
                                    enabled, CS.lkas11, hud_alert, lane_visible, left_lane_depart, right_lane_depart,

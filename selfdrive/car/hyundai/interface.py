@@ -3,7 +3,7 @@ from cereal import car
 from selfdrive.config import Conversions as CV
 from selfdrive.controls.lib.drive_helpers import EventTypes as ET, create_event
 from selfdrive.controls.lib.vehicle_model import VehicleModel
-from selfdrive.car.hyundai.carstate import CarState, get_can_parser, get_scc_parser, get_camera_parser
+from selfdrive.car.hyundai.carstate import CarState, get_can_parser, get_mdps_parser, get_camera_parser
 from selfdrive.car.hyundai.values import ECU, ECU_FINGERPRINT, CAR, FINGERPRINTS
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, is_ecu_disconnected, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
@@ -25,7 +25,7 @@ class CarInterface(CarInterfaceBase):
     # *** init the major players ***
     self.CS = CarState(CP)
     self.cp = get_can_parser(CP)
-    self.cp_scc = get_scc_parser(CP)
+    self.cp_mdps = get_mdps_parser(CP)
     self.cp_cam = get_camera_parser(CP)
 
     self.CC = None
@@ -83,7 +83,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kf = 0.00005
       ret.mass = 2060. + STD_CARGO_KG
       ret.wheelbase = 3.01
-      ret.steerRatio = 16.5
+      ret.steerRatio = 12.069
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.16], [0.01]]
       ret.minSteerSpeed = 60 * CV.KPH_TO_MS
@@ -125,6 +125,15 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.385
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
+    elif candidate == CAR.IONIQ_EV_LTD:
+      ret.lateralTuning.pid.kf = 0.00006
+      ret.mass = 1490. + STD_CARGO_KG   #weight per hyundai site https://www.hyundaiusa.com/ioniq-electric/specifications.aspx
+      ret.wheelbase = 2.7
+      ret.steerRatio = 13.73   #Spec
+      tire_stiffness_factor = 0.385
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
+      ret.minSteerSpeed = 32 * CV.MPH_TO_MS
     elif candidate == CAR.KIA_FORTE:
       ret.lateralTuning.pid.kf = 0.00005
       ret.mass = 3558. * CV.LB_TO_KG
@@ -180,9 +189,10 @@ class CarInterface(CarInterfaceBase):
   def update(self, c, can_strings):
     # ******************* do can recv *******************
     self.cp.update_strings(can_strings)
+    self.cp_mdps.update_strings(can_strings)
     self.cp_cam.update_strings(can_strings)
 
-    self.CS.update(self.cp, self.cp_scc, self.cp_cam)
+    self.CS.update(self.cp, self.cp_mdps, self.cp_cam)
     # create message
     ret = car.CarState.new_message()
 
@@ -219,12 +229,12 @@ class CarInterface(CarInterfaceBase):
     ret.steeringPressed = self.CS.steer_override
 
     # cruise state
-    ret.cruiseState.enabled = self.CS.main_on != 0
+    ret.cruiseState.enabled = self.CS.lkas_button_on
     if self.CS.pcm_acc_status != 0:
       ret.cruiseState.speed = self.CS.cruise_set_speed
     else:
       ret.cruiseState.speed = 0
-    ret.cruiseState.available = bool(self.CS.main_on)
+    ret.cruiseState.available = True
     ret.cruiseState.standstill = False
 
     # TODO: button presses
@@ -250,9 +260,9 @@ class CarInterface(CarInterfaceBase):
     ret.seatbeltUnlatched = not self.CS.seatbelt
 
     # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
-    if ret.vEgo < (self.CP.minSteerSpeed + 1.) and self.CP.minSteerSpeed > 10.:
-      self.low_speed_alert = True
-    if ret.vEgo > (self.CP.minSteerSpeed + 1.):
+    if ret.vEgo < (self.CP.minSteerSpeed + 0.2) and self.CP.minSteerSpeed > 10.:	
+      self.low_speed_alert = True	
+    if ret.vEgo > (self.CP.minSteerSpeed + 0.7):	
       self.low_speed_alert = False
 
     # turning indicator alert hysteresis logic
@@ -267,8 +277,8 @@ class CarInterface(CarInterfaceBase):
       events.append(create_event('seatbeltNotLatched', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
     if self.CS.esp_disabled:
       events.append(create_event('espDisabled', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
-    if not self.CS.main_on:
-      events.append(create_event('wrongCarMode', [ET.NO_ENTRY, ET.USER_DISABLE]))
+    #if not self.CS.main_on:
+      #events.append(create_event('wrongCarMode', [ET.NO_ENTRY, ET.USER_DISABLE]))
     if ret.gearShifter == GearShifter.reverse:
       events.append(create_event('reverseGear', [ET.NO_ENTRY, ET.IMMEDIATE_DISABLE]))
     if self.CS.steer_error:
