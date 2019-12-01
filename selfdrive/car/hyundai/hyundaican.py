@@ -86,7 +86,7 @@ def create_clu11(packer, clu11, button, cnt):
     "CF_Clu_AliveCnt1": cnt,
   }
 
-  return packer.make_can_msg("CLU11", 0, values)
+  return packer.make_can_msg("CLU11", 2, values)
 
 def create_scc12(packer, cnt, scc12):
   values = {
