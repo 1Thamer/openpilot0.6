@@ -103,6 +103,9 @@ class CarController():
       can_sends.append(create_scc12(self.packer, self.scc12_cnt, CS.scc12))
       self.scc12_cnt += 1
 
+    low_speed = 61 if CS.v_ego < 17 else 0
+    can_sends.append(create_clu11(self.packer, CS.clu11, Buttons.NONE, low_speed, self.clu11_cnt))
+
     #if pcm_cancel_cmd:
       #self.clu11_cnt = frame % 0x10
       #can_sends.append(create_clu11(self.packer, CS.clu11, Buttons.CANCEL, self.clu11_cnt))
@@ -115,7 +118,7 @@ class CarController():
         self.clu11_cnt = 0
       # when lead car starts moving, create 6 RES msgs
       elif CS.lead_distance > self.last_lead_distance and (frame - self.last_resume_frame) > 5:
-        can_sends.append(create_clu11(self.packer, CS.clu11, Buttons.RES_ACCEL, self.clu11_cnt))
+        can_sends.append(create_clu11(self.packer, CS.clu11, Buttons.RES_ACCEL, 0, self.clu11_cnt))
         self.clu11_cnt += 1
         # interval after 6 msgs
         if self.clu11_cnt > 5:
