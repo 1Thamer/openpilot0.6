@@ -185,8 +185,8 @@ static int hyundai_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
       }
       else {
         OP_LKAS_live -= 1;
-        hyundai_LKAS_forwarded = 1;
-        bus_fwd = 0;
+        //hyundai_LKAS_forwarded = 1;
+        //bus_fwd = 0;
       }
     }
   }
