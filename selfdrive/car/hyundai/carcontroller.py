@@ -95,10 +95,12 @@ class CarController():
     elif not pcm_cancel_cmd:
       can_sends.append(create_mdps12(self.packer, self.car_fingerprint, self.mdps12_cnt, CS.mdps12))
 
-    can_sends.append(create_lkas11(self.packer, self.car_fingerprint, apply_steer, steer_req, self.lkas11_cnt,
+    can_sends.append(create_lkas11(self.packer, self.car_fingerprint, 1, apply_steer, steer_req, self.lkas11_cnt,
                                    enabled, CS.lkas11, hud_alert, lane_visible, left_lane_depart, right_lane_depart,
                                    keep_stock=(not self.camera_disconnected)))
-    
+    can_sends.append(create_lkas11(self.packer, self.car_fingerprint, 0, apply_steer, steer_req, self.lkas11_cnt,
+                                   enabled, CS.lkas11, hud_alert, lane_visible, left_lane_depart, right_lane_depart,
+                                   keep_stock=(not self.camera_disconnected)))
     if frame % 2:
       can_sends.append(create_scc12(self.packer, self.scc12_cnt, CS.scc12))
       self.scc12_cnt += 1
