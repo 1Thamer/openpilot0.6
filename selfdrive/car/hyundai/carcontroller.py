@@ -59,7 +59,7 @@ class CarController():
 
     if CS.left_blinker_on or CS.right_blinker_on:
       self.turning_signal_timer = 100  # Disable for 1.0 Seconds after blinker turned off
-    if self.turning_signal_timer or CS.angle_steers > 18. and CS.steer_override and CS.v_ego < 17:
+    if self.turning_signal_timer or CS.angle_steers > 18. and CS.v_ego < 17.:
       enabled = 0
 
     ### Steering Torque
