@@ -1376,6 +1376,7 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
     char val_str[16];
     char uom_str[6];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    if (scene->angleSteersDes) {
       //show Orange if more than 6 degrees
       //show red if  more than 12 degrees
       if(((int)(scene->angleSteersDes) < -6) || ((int)(scene->angleSteersDes) > 6)) {
@@ -1386,7 +1387,9 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
       }
       // steering is in degrees
       snprintf(val_str, sizeof(val_str), "%.0f°",(scene->angleSteersDes));
-
+    } else {
+       snprintf(val_str, sizeof(val_str), "-");
+    }
       snprintf(uom_str, sizeof(uom_str), "");
     bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "DESIR STEER",
         bb_rx, bb_ry, bb_uom_dx,
@@ -2142,7 +2145,6 @@ void handle_message(UIState *s, void *which) {
     s->scene.v_cruise = datad.vCruise;
     s->scene.v_ego = datad.vEgo;
     s->scene.angleSteers = datad.angleSteers;
-    s->scene.angleSteersDes = datad.angleSteersDes;
     s->scene.steerOverride = datad.steerOverride;
     s->scene.curvature = datad.curvature;
     s->scene.engaged = datad.enabled;
@@ -2154,6 +2156,9 @@ void handle_message(UIState *s, void *which) {
     s->scene.frontview = datad.rearViewCam;
 
     s->scene.decel_for_model = datad.decelForModel;
+    if (datad.enabled) {
+      s->scene.angleSteersDes = datad.angleSteersDes;
+    }
 
     s->alert_sound_timeout = 1 * UI_FREQ;
 
