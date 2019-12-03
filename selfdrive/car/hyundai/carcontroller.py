@@ -6,8 +6,24 @@ from selfdrive.car.hyundai.hyundaican import create_lkas11, create_lkas12, \
 from selfdrive.car.hyundai.values import CAR, Buttons, SteerLimitParams
 from selfdrive.can.packer import CANPacker
 
-
 VisualAlert = car.CarControl.HUDControl.VisualAlert
+
+# Accel limits
+ACCEL_HYST_GAP = 0.02  # don't change accel command for small oscilalitons within this value
+ACCEL_MAX = 1.5  # 1.5 m/s2
+ACCEL_MIN = -3.0 # 3   m/s2
+ACCEL_SCALE = max(ACCEL_MAX, -ACCEL_MIN)
+
+def accel_hysteresis(accel, accel_steady):
+
+  # for small accel oscillations within ACCEL_HYST_GAP, don't change the accel command
+  if accel > accel_steady + ACCEL_HYST_GAP:
+    accel_steady = accel - ACCEL_HYST_GAP
+  elif accel < accel_steady - ACCEL_HYST_GAP:
+    accel_steady = accel + ACCEL_HYST_GAP
+  accel = accel_steady
+
+  return accel, accel_steady
 
 def process_hud_alert(enabled, fingerprint, visual_alert, left_line,
                        right_line, left_lane_depart, right_lane_depart):
@@ -41,6 +57,7 @@ def process_hud_alert(enabled, fingerprint, visual_alert, left_line,
 class CarController():
   def __init__(self, dbc_name, car_fingerprint):
     self.apply_steer_last = 0
+    self.accel_steady = 0.
     self.car_fingerprint = car_fingerprint
     self.lkas11_cnt = 0
     self.clu11_cnt = 0
@@ -57,26 +74,36 @@ class CarController():
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, visual_alert,
               left_line, right_line, left_lane_depart, right_lane_depart):
 
+    # *** compute control surfaces ***
+
+    # gas and brake
+    apply_accel = actuators.gas - actuators.brake
+
+    apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady, enabled)
+    apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
+
+    steering_enabled = enabled
     if CS.left_blinker_on or CS.right_blinker_on:
       self.turning_signal_timer = 100  # Disable for 1.0 Seconds after blinker turned off
     if self.turning_signal_timer or abs(CS.angle_steers) > 100.:
-      enabled = 0
+      steering_enabled = 0
 
     ### Steering Torque
     apply_steer = actuators.steer * SteerLimitParams.STEER_MAX
 
     apply_steer = apply_std_steer_torque_limits(apply_steer, self.apply_steer_last, CS.steer_torque_driver, SteerLimitParams)
 
-    if not enabled:
+    if not steering_enabled:
       apply_steer = 0
 
-    steer_req = 1 if enabled else 0
-
-    self.apply_steer_last = apply_steer
+    steer_req = 1 if apply_steer else 0
 
     hud_alert, lane_visible, left_lane_warning, right_lane_warning =\
-            process_hud_alert(enabled, self.car_fingerprint, visual_alert,
+            process_hud_alert(steering_enabled, self.car_fingerprint, visual_alert,
             left_line, right_line,left_lane_depart, right_lane_depart)
+
+    self.apply_accel_last = apply_accel
+    self.apply_steer_last = apply_steer
 
     can_sends = []
 
@@ -96,13 +123,13 @@ class CarController():
       can_sends.append(create_mdps12(self.packer, self.car_fingerprint, self.mdps12_cnt, CS.mdps12))
 
     can_sends.append(create_lkas11(self.packer, self.car_fingerprint, 1, apply_steer, steer_req, self.lkas11_cnt,
-                                   enabled, CS.lkas11, hud_alert, lane_visible, left_lane_depart, right_lane_depart,
+                                   steering_enabled, CS.lkas11, hud_alert, lane_visible, left_lane_depart, right_lane_depart,
                                    keep_stock=(not self.camera_disconnected)))
     can_sends.append(create_lkas11(self.packer, self.car_fingerprint, 0, apply_steer, steer_req, self.lkas11_cnt,
-                                   enabled, CS.lkas11, hud_alert, lane_visible, left_lane_depart, right_lane_depart,
+                                   steering_enabled, CS.lkas11, hud_alert, lane_visible, left_lane_depart, right_lane_depart,
                                    keep_stock=(not self.camera_disconnected)))
     if frame % 2:
-      can_sends.append(create_scc12(self.packer, self.scc12_cnt, CS.scc12))
+      can_sends.append(create_scc12(self.packer, apply_accel, enabled, self.scc12_cnt, CS.scc12))
       self.scc12_cnt += 1
 
     low_speed = 61 if CS.v_ego < 17 else 0
