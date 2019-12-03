@@ -88,7 +88,7 @@ def create_clu11(packer, clu11, button, speed, cnt):
 
   return packer.make_can_msg("CLU11", 1 if button == 0 else 2, values)
 
-def create_scc12(packer, cnt, scc12):
+def create_scc12(packer, apply_accel, enabled, cnt, scc12):
   values = {
     "CF_VSM_Prefill": scc12["CF_VSM_Prefill"],
     "CF_VSM_DecCmdAct": scc12["CF_VSM_DecCmdAct"],
@@ -100,10 +100,10 @@ def create_scc12(packer, cnt, scc12):
     "ACCMode": scc12["ACCMode"],
     "StopReq": scc12["StopReq"],
     "CR_VSM_DecCmd": scc12["CR_VSM_DecCmd"],
-    "aReqMax": scc12["aReqMax"],
+    "aReqMax": apply_accel if enabled and scc12["ACCMode"] else scc12["aReqMax"],
     "TakeOverReq": scc12["TakeOverReq"],
     "PreFill": scc12["PreFill"],
-    "aReqMin": scc12["aReqMin"],
+    "aReqMin": apply_accel if enabled and scc12["ACCMode"] else scc12["aReqMin"],
     "CF_VSM_ConfMode": scc12["CF_VSM_ConfMode"],
     "AEB_Failinfo": scc12["AEB_Failinfo"],
     "AEB_Status": scc12["AEB_Status"],
