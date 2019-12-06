@@ -177,7 +177,8 @@ class CarState():
     self.seatbelt = cp.vl["CGW1"]['CF_Gway_DrvSeatBeltSw']
 
     self.brake_pressed = cp.vl["TCS13"]['DriverBraking']
-    #self.esp_disabled = cp.vl["TCS15"]['ESC_Off_Step']
+    #self.esp_disabled = cp.vl["TCS15"]['ESC_Off_Step'] 
+    #ESP turend off
     self.esp_disabled = 0
     self.park_brake = cp.vl["CGW1"]['CF_Gway_ParkBrakeSw']
 
